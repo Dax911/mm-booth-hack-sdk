@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import 'tailwindcss/tailwind.css'
+import 'tailwindcss/tailwind.css';
+import axios from 'axios';
+
+// 0xc0ffee254729296a45a3885639AC7E10F9d54979
 
 function App() {
   const [input, setInput] = useState<string>('');
@@ -28,6 +31,7 @@ function App() {
   }
 
   const handleAddress = () => {
+
     if (addressInput.trim() === '') {
       setError('Input cannot be empty.'); // <-- Set error
       return;
@@ -35,10 +39,10 @@ function App() {
 
     if (addressInput.length !== ADDRESSLEN) {
       setError('Input does not match required length. Try again.'); // <-- check len
-      onSuccess();
       return;
     }
 
+    onSuccess(); // <-- if we made it here we are successful
     setError(null);
     setAddress(addressInput);
     setAddressInput();
@@ -46,6 +50,7 @@ function App() {
   };
 
   const handleAdd = () => {
+
     if (input.trim() === '') {
       setError('Input cannot be empty.'); // <-- Set error
       return;
@@ -67,7 +72,21 @@ function App() {
 
   };
 
+  function getEthPrice(): number {
+    let response = 0;
+    new Promise(async (resolve, reject) => {
+      try {
+        response = await axios.get('https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest');
+      } catch (error) {
+          console.error(error);
+        };
+      });    
+
+    return response;
+  };
+
   const subtotal = list.reduce((acc, curr) => acc + parseFloat(curr), 0);
+  const ethPrice = getEthPrice();
 
   return (
     
@@ -122,13 +141,14 @@ function App() {
               ))}
             </ul>
           </div>
-          
-          {list.length > 0 && <p className="mt-4 text-xl font-semibold text-center">Subtotal: {subtotal.toFixed(6)}</p>}
+          <br></br>
+          {list.length > 0 && <p className="mt-4 text-xl font-semibold text-center">Subtotal: ${subtotal.toFixed(2)}</p>}
+          {ethPrice !== 0 && <p className="mt-4 text-xl font-semibold text-center">ETH Price: {ethPrice.toFixed(8)}</p>}
         </div>
       </div>
     );
-  
-  
 }
+
+//Ξ
 
 export default App;
